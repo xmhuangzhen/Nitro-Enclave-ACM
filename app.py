@@ -39,11 +39,13 @@ class EC2InstanceStack(Stack):
 
         # Instance
         instance = ec2.Instance(self, "Instance",
-            instance_type=ec2.InstanceType("t3.nano"),
+            instance_type=ec2.InstanceType("m5.xlarge"),
             machine_image=amzn_linux,
             vpc = vpc,
             role = role
             )
+
+        instance.instance.enclave_options = {'enabled': True}
 
         # Script in S3 as Asset
         asset = Asset(self, "Asset", path=os.path.join(dirname, "configure.sh"))
