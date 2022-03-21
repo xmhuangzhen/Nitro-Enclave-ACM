@@ -1,6 +1,8 @@
 import os.path
+import boto3
 
 from aws_cdk.aws_s3_assets import Asset
+#from aws_cdk.aws_s3 import s3
 
 from aws_cdk import (
     aws_ec2 as ec2,
@@ -17,6 +19,9 @@ class EC2InstanceStack(Stack):
 
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
+
+        #s3 bucket
+        bucket = s3.Bucket(self, "MyFirstBucket", versioned=True)
 
         # VPC
         vpc = ec2.Vpc(self, "VPC",
@@ -59,6 +64,10 @@ class EC2InstanceStack(Stack):
             file_path=local_path
             )
         asset.grant_read(instance.role)
+
+        
+        s3 = boto3.client('s3')
+        s3.upload_file(f"/tmp/asteroids_{self.today}.{self.file_format}", os.environ['S3_BUCKET'], f"asteroid_data/asteroids_{self.today}.{self.file_format}")
 
 app = App()
 EC2InstanceStack(app, "ec2-instance")
