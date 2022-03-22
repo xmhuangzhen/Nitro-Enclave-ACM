@@ -30,24 +30,24 @@ class NitroEnclavesStack(Stack):
              hosted_zone=zone,
         )
 
-        # vpc = ec2.Vpc(
-        #     self, 'Vpc',
-        #     cidr='10.11.12.0/24',
-        #     max_azs=2,
-        #     # Only need public IPs, so no need for private subnets
-        #     subnet_configuration=[
-        #         ec2.SubnetConfiguration(
-        #             name='public',
-        #             subnet_type=ec2.SubnetType.PUBLIC
-        #         )
-        #     ]
-        # )
+        vpc = ec2.Vpc(
+            self, 'Vpc',
+            cidr='10.0.0.0/16',
+            max_azs=2,
+            # Only need public IPs, so no need for private subnets
+            subnet_configuration=[
+                ec2.SubnetConfiguration(
+                    name='public',
+                    subnet_type=ec2.SubnetType.PUBLIC
+                )
+            ]
+        )
 
         # VPC
-        vpc = ec2.Vpc(self, "VPC",
-            nat_gateways=0,
-            subnet_configuration=[ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC)]
-        )
+        # vpc = ec2.Vpc(self, "VPC",
+        #     nat_gateways=0,
+        #     subnet_configuration=[ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC)]
+        # )
 
         role = iam.Role(
             self, 'Ec2SsmRole',
