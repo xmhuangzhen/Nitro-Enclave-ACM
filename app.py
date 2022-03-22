@@ -1,13 +1,14 @@
-from os import environ
+import os
 from aws_cdk import (
     aws_certificatemanager as acm,
     aws_ec2 as ec2,
     aws_iam as iam,
     aws_route53 as route53,
     aws_s3_assets as s3_assets,
-    App, Stack
+    App, Stack, Environment
 )
 
+from constructs import Construct
 
 class NitroEnclavesStack(Stack):
 
@@ -22,24 +23,30 @@ class NitroEnclavesStack(Stack):
             self, 'Zone',
             domain_name=domain_name,
         )
-
+ 
         certificate = acm.DnsValidatedCertificate(
-            self, 'Certificate',
-            domain_name=subdomain,
-            hosted_zone=zone,
+             self, 'Certificate',
+             domain_name=subdomain,
+             hosted_zone=zone,
         )
 
-        vpc = ec2.Vpc(
-            self, 'Vpc',
-            cidr='10.11.12.0/24',
-            max_azs=2,
-            # Only need public IPs, so no need for private subnets
-            subnet_configuration=[
-                ec2.SubnetConfiguration(
-                    name='public',
-                    subnet_type=ec2.SubnetType.PUBLIC
-                )
-            ]
+        # vpc = ec2.Vpc(
+        #     self, 'Vpc',
+        #     cidr='10.11.12.0/24',
+        #     max_azs=2,
+        #     # Only need public IPs, so no need for private subnets
+        #     subnet_configuration=[
+        #         ec2.SubnetConfiguration(
+        #             name='public',
+        #             subnet_type=ec2.SubnetType.PUBLIC
+        #         )
+        #     ]
+        # )
+
+        # VPC
+        vpc = ec2.Vpc(self, "VPC",
+            nat_gateways=0,
+            subnet_configuration=[ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC)]
         )
 
         role = iam.Role(
@@ -161,8 +168,12 @@ app = App()
 NitroEnclavesStack(
     app, 'EnclavesDemo',
     env=Environment(
-        account=environ['CDK_DEFAULT_ACCOUNT'],
-        region=environ['CDK_DEFAULT_REGION'],
+       account=os.environ.get(
+            "CDK_DEPLOY_ACCOUNT", os.environ.get("CDK_DEFAULT_ACCOUNT")
+        ),
+        region=os.environ.get(
+            "CDK_DEPLOY_REGION", os.environ.get("CDK_DEFAULT_REGION")
+        ),
     )
 )
 app.synth()
