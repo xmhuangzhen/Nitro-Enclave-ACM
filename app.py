@@ -15,16 +15,8 @@ class NitroEnclavesStack(Stack):
     def __init__(self, scope: Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
-        # domain_name = self.node.try_get_context('domain_name')
+        domain_name = self.node.try_get_context('domain_name')
 
-        # subdomain = 'enclave.{}'.format(domain_name)
-
-        vpcid = 'vpc-0331a996e9acf9b6c'
-        vpc = ec2.Vpc.from_lookup(self,"VPC",vpc_id=vpcid)
-
-        pubsubnet = vpc.select_subnets(subnetType=ec2.SubnetType.PUBLIC)
-
-        domain_name = 'us-east-1a'
         subdomain = 'enclave.{}'.format(domain_name)
 
         zone = route53.HostedZone.from_lookup(
@@ -38,18 +30,18 @@ class NitroEnclavesStack(Stack):
              hosted_zone=zone,
         )
 
-        # vpc = ec2.Vpc(
-        #     self, 'Vpc',
-        #     cidr='10.0.0.0/16',
-        #     max_azs=2,
-        #     # Only need public IPs, so no need for private subnets
-        #     subnet_configuration=[
-        #         ec2.SubnetConfiguration(
-        #             name='public',
-        #             subnet_type=ec2.SubnetType.PUBLIC
-        #         )
-        #     ]
-        # )
+        vpc = ec2.Vpc(
+            self, 'Vpc',
+            cidr='10.0.0.0/16',
+            max_azs=2,
+            # Only need public IPs, so no need for private subnets
+            subnet_configuration=[
+                ec2.SubnetConfiguration(
+                    name='public',
+                    subnet_type=ec2.SubnetType.PUBLIC
+                )
+            ]
+        )
 
 
         # VPC
