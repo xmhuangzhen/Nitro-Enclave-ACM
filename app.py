@@ -1,18 +1,18 @@
-import os
+#!/usr/bin/env python3
+from os import environ
 from aws_cdk import (
+    core,
     aws_certificatemanager as acm,
     aws_ec2 as ec2,
     aws_iam as iam,
     aws_route53 as route53,
     aws_s3_assets as s3_assets,
-    App, Stack, Environment
 )
 
-from constructs import Construct
+# source:https://github.com/MarkBiesheuvel/demo-templates/blob/master/nitro-enclaves/app.py
+class NitroEnclavesStack(core.Stack):
 
-class NitroEnclavesStack(Stack):
-
-    def __init__(self, scope: Construct, id: str, **kwargs) -> None:
+    def __init__(self, scope: core.Construct, id: str, **kwargs) -> None:
         super().__init__(scope, id, **kwargs)
 
         domain_name = self.node.try_get_context('domain_name')
@@ -23,16 +23,16 @@ class NitroEnclavesStack(Stack):
             self, 'Zone',
             domain_name=domain_name,
         )
- 
+
         certificate = acm.DnsValidatedCertificate(
-             self, 'Certificate',
-             domain_name=subdomain,
-             hosted_zone=zone,
+            self, 'Certificate',
+            domain_name=subdomain,
+            hosted_zone=zone,
         )
 
         vpc = ec2.Vpc(
             self, 'Vpc',
-            cidr='10.0.0.0/16',
+            cidr='10.11.12.0/24',
             max_azs=2,
             # Only need public IPs, so no need for private subnets
             subnet_configuration=[
@@ -42,13 +42,6 @@ class NitroEnclavesStack(Stack):
                 )
             ]
         )
-
-
-        # VPC
-        # vpc = ec2.Vpc(self, "VPC",
-        #     nat_gateways=0,
-        #     subnet_configuration=[ec2.SubnetConfiguration(name="public",subnet_type=ec2.SubnetType.PUBLIC)]
-        # )
 
         role = iam.Role(
             self, 'Ec2SsmRole',
@@ -61,6 +54,26 @@ class NitroEnclavesStack(Stack):
         role.add_to_policy(
             iam.PolicyStatement(
                 actions=['ec2:AssociateEnclaveCertificateIamRole'],
+                resources=[
+                    certificate.certificate_arn,
+                    role.role_arn,
+                ],
+            )
+        )
+
+        role.add_to_policy(
+            iam.PolicyStatement(
+                actions=['ec2:GetAssociatedEnclaveCertificateIamRoles'],
+                resources=[
+                    certificate.certificate_arn,
+                    role.role_arn,
+                ],
+            )
+        )
+
+        role.add_to_policy(
+            iam.PolicyStatement(
+                actions=['ec2:DisassociateEnclaveCertificateIamRole'],
                 resources=[
                     certificate.certificate_arn,
                     role.role_arn,
@@ -139,7 +152,7 @@ class NitroEnclavesStack(Stack):
             # Source: https://aws.amazon.com/marketplace/server/configuration?productId=3f5ee4f8-1439-4bce-ac57-e794a4ca82f9&ref_=psb_cfg_continue
             machine_image=ec2.MachineImage.lookup(
                 name='ACM-For-Nitro-Enclaves-*',
-                owners=['679593333241'],
+                owners=['763880777493'],
             ),
             # Nitro Enclaves requires at least 4 vCPUs and does not run on Graviton
             instance_type=ec2.InstanceType.of(
@@ -165,16 +178,12 @@ class NitroEnclavesStack(Stack):
         )
 
 
-app = App()
+app = core.App()
 NitroEnclavesStack(
     app, 'EnclavesDemo',
-    env=Environment(
-       account=os.environ.get(
-            "CDK_DEPLOY_ACCOUNT", os.environ.get("CDK_DEFAULT_ACCOUNT")
-        ),
-        region=os.environ.get(
-            "CDK_DEPLOY_REGION", os.environ.get("CDK_DEFAULT_REGION")
-        ),
+    env=core.Environment(
+        account=environ['CDK_DEFAULT_ACCOUNT'],
+        region=environ['CDK_DEFAULT_REGION'],
     )
 )
 app.synth()
