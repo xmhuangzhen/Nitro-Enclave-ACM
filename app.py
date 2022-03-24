@@ -143,6 +143,14 @@ class NitroEnclavesStack(core.Stack):
             'systemctl enable nitro-enclaves-acm',
         )
 
+        # AMI
+        amzn_linux = ec2.MachineImage.latest_amazon_linux(
+            generation=ec2.AmazonLinuxGeneration.AMAZON_LINUX_2,
+            edition=ec2.AmazonLinuxEdition.STANDARD,
+            virtualization=ec2.AmazonLinuxVirt.HVM,
+            storage=ec2.AmazonLinuxStorage.GENERAL_PURPOSE
+        )
+
         instance = ec2.Instance(
             self, 'Instance',
             role=role,
@@ -150,7 +158,7 @@ class NitroEnclavesStack(core.Stack):
             user_data=user_data,
             # AWS Marketplace AMI: AWS Certificate Manager for Nitro Enclaves
             # Source: https://aws.amazon.com/marketplace/server/configuration?productId=3f5ee4f8-1439-4bce-ac57-e794a4ca82f9&ref_=psb_cfg_continue
-            machineImage=ec2.MachineImage.latestAmazonLinux(),
+            machineImage=amzn_linux,
             # Nitro Enclaves requires at least 4 vCPUs and does not run on Graviton
             instance_type=ec2.InstanceType.of(
                 instance_class=ec2.InstanceClass.COMPUTE5_AMD,
