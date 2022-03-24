@@ -182,7 +182,7 @@ class NitroEnclavesStack(core.Stack):
 
 app = core.App()
 NitroEnclavesStack(
-    app, 'EnclavesDemo',
+    app, 'NitroEnclaveACMStack',
     env=core.Environment(
         account=environ['CDK_DEFAULT_ACCOUNT'],
         region=environ['CDK_DEFAULT_REGION'],
