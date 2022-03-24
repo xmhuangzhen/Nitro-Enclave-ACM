@@ -158,7 +158,7 @@ class NitroEnclavesStack(core.Stack):
             user_data=user_data,
             # AWS Marketplace AMI: AWS Certificate Manager for Nitro Enclaves
             # Source: https://aws.amazon.com/marketplace/server/configuration?productId=3f5ee4f8-1439-4bce-ac57-e794a4ca82f9&ref_=psb_cfg_continue
-            machineImage=amzn_linux,
+            machine_image=amzn_linux,
             # Nitro Enclaves requires at least 4 vCPUs and does not run on Graviton
             instance_type=ec2.InstanceType("m5.xlarge"),
         )
