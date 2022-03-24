@@ -160,10 +160,7 @@ class NitroEnclavesStack(core.Stack):
             # Source: https://aws.amazon.com/marketplace/server/configuration?productId=3f5ee4f8-1439-4bce-ac57-e794a4ca82f9&ref_=psb_cfg_continue
             machineImage=amzn_linux,
             # Nitro Enclaves requires at least 4 vCPUs and does not run on Graviton
-            instance_type=ec2.InstanceType.of(
-                instance_class=ec2.InstanceClass.COMPUTE5_AMD,
-                instance_size=ec2.InstanceSize.XLARGE,
-            ),
+            instance_type=ec2.InstanceType("m5.xlarge"),
         )
 
         # Unsupported property by CDK
