@@ -29,3 +29,36 @@ cdk deploy --context domain_name=demo.training
 ```
 
 Note that `demo.training` needs to be replace with the hosted zone name in your account.
+
+
+### installing steps
+
+```git
+sudo yum update -y
+
+export AWS_ACCESS_KEY_ID=xxxxxxxxxxxxxx
+export AWS_SECRET_ACCESS_KEY=xxxxxxxxxxxxxxx
+export AWS_DEFAULT_REGION=xxxxxxxxxxxxx
+
+sudo yum install git -y
+
+# install npm
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash
+. ~/.nvm/nvm.sh
+nvm install node
+
+# install pip
+curl -O https://bootstrap.pypa.io/get-pip.py
+python3 get-pip.py --user
+export PATH=~/.local/bin:$PATH
+
+# install cdk
+npm install -g aws-cdk
+
+aws sts get-caller-identity
+git clone https://github.com/xmhuangzhen/Nitro-Enclave-ACM.git
+cd Nitro-Enclave-ACM
+pip install -r requirements.txt
+cdk bootstrap aws://account_id/account_region --context domain_name=xxxxxxxxxxxxxx
+cdk deploy --context domain_name=xxxxxxxxxxxxx
+```
